@@ -50,10 +50,12 @@
     </style>
 </head>
 <body>
-    <video id="video-fondo" autoplay muted loop>
+    <video id="video-fondo" autoplay loop>
         <source src="/video_fondo.mp4" type="video/mp4">
         Tu navegador no soporta el formato de video.
     </video>
+
+    <div id="video-overlay" onclick="activarSonido()">🔊 Activar sonido</div>
 
     <div id="encuesta">
         <h2>¿Acepta participar en la encuesta?</h2>
@@ -76,6 +78,10 @@
                 return;
             }
             respuestas.push({ participacion: acepta });
+
+            // Activar sonido cuando el usuario acepta participar
+            activarSonido(); 
+
             document.getElementById('encuesta').innerHTML = `
                 <h2>Información del Participante</h2>
                 <input id="nombre" placeholder="Nombre(s)" type="text">
@@ -140,6 +146,14 @@
             .then(data => console.log('Respuestas guardadas correctamente'))
             .catch(error => console.error('Error al guardar respuestas:', error));
         }
+
+        function activarSonido() {
+            const video = document.getElementById('video-fondo');
+            video.muted = false;
+            video.play();
+            document.getElementById('video-overlay').style.display = 'none';
+        }
     </script>
 </body>
 </html>
+
