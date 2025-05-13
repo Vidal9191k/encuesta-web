@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Encuesta Web</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            background: #000;
+            position: relative;
+        }
+        #video-fondo {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            z-index: -1;
+        }
+        #encuesta {
+            max-width: 400px;
+            background-color: rgba(255, 255, 255, 0.8);
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            text-align: center;
+            z-index: 1;
+        }
+        input {
+            margin-bottom: 10px;
+            width: 100%;
+            padding: 8px;
+            font-size: 14px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+        button {
+            margin: 10px;
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <video id="video-fondo" autoplay muted loop>
+        <source src="/video_fondo.mp4" type="video/mp4">
+        Tu navegador no soporta el formato de video.
+    </video>
+
+    <div id="encuesta">
+        <h2>¿Acepta participar en la encuesta?</h2>
+        <button onclick="iniciarEncuesta('Sí')">Sí</button>
+        <button onclick="iniciarEncuesta('No')">No</button>
+    </div>
+
+    <script>
+        const preguntas = [
+            "¿Conoce usted al candidato Juan Jose Ruiz Hernandez alias el (JJ)?",
+            "Si en este momento fueran las elecciones, ¿Votaría usted por Juan Jose Ruiz Hernandez?"
+        ];
+
+        let respuestas = [];
+        let step = 0;
+
+        function iniciarEncuesta(acepta) {
+            if (acepta === 'No') {
+                document.getElementById('encuesta').innerHTML = '<h2>¡Gracias por su tiempo!</h2>';
+                return;
+            }
+            respuestas.push({ participacion: acepta });
+            document.getElementById('encuesta').innerHTML = `
+                <h2>Información del Participante</h2>
+                <input id="nombre" placeholder="Nombre(s)" type="text">
+                <input id="apellidos" placeholder="Apellidos" type="text">
+                <input id="telefono" placeholder="Número de Teléfono" type="tel">
+                <button onclick="mostrarPreguntas()">Iniciar Encuesta</button>
+            `;
+        }
+
+        function mostrarPreguntas() {
+            const nombre = document.getElementById('nombre').value;
+            const apellidos = document.getElementById('apellidos').value;
+            const telefono = document.getElementById('telefono').value;
+            const telefonoRegex = /^\d{10}$/;
+
+            if (nombre === '' || apellidos === '' || telefono === '') {
+                alert('Por favor, complete todos los campos para continuar.');
+                return;
+            }
+            if (!telefonoRegex.test(telefono)) {
+                alert('Por favor, ingresa un número de teléfono válido de 10 dígitos.');
+                return;
+            }
+
+            respuestas[0].nombre = nombre;
+            respuestas[0].apellidos = apellidos;
+            respuestas[0].telefono = telefono;
+
+            document.getElementById('encuesta').innerHTML = `
+                <h2 id="pregunta">${preguntas[step]}</h2>
+                <button onclick="handleResponse('Sí')">Sí</button>
+                <button onclick="handleResponse('No')">No</button>
+            `;
+        }
+
+        function handleResponse(respuesta) {
+            if (step === 0) {
+                respuestas[0].conoceCandidato = respuesta;
+            } else if (step === 1) {
+                respuestas[0].votaria = respuesta;
+            }
+
+            step++;
+
+            if (step < preguntas.length) {
+                document.getElementById('pregunta').innerText = preguntas[step];
+            } else {
+                document.getElementById('encuesta').innerHTML = '<h2>¡Gracias por participar!</h2>';
+                exportarRespuestas();
+            }
+        }
+
+        function exportarRespuestas() {
+            fetch('/guardar-respuestas', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ respuestas }),
+            })
+            .then(response => response.json())
+            .then(data => console.log('Respuestas guardadas correctamente'))
+            .catch(error => console.error('Error al guardar respuestas:', error));
+        }
+    </script>
+</body>
+</html>
