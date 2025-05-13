@@ -23,6 +23,7 @@
             height: 100%;
             object-fit: cover;
             z-index: -1;
+            opacity: 0.7; /* Añadido para darle un efecto más sutil */
         }
         #encuesta {
             max-width: 400px;
@@ -47,10 +48,22 @@
             font-size: 16px;
             cursor: pointer;
         }
+        #video-overlay {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: white;
+            background-color: rgba(0, 0, 0, 0.5);
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            z-index: 2;
+        }
     </style>
 </head>
 <body>
-    <video id="video-fondo" autoplay loop>
+    <video id="video-fondo" muted loop>
         <source src="/video_fondo.mp4" type="video/mp4">
         Tu navegador no soporta el formato de video.
     </video>
@@ -78,10 +91,6 @@
                 return;
             }
             respuestas.push({ participacion: acepta });
-
-            // Activar sonido cuando el usuario acepta participar
-            activarSonido(); 
-
             document.getElementById('encuesta').innerHTML = `
                 <h2>Información del Participante</h2>
                 <input id="nombre" placeholder="Nombre(s)" type="text">
@@ -89,6 +98,7 @@
                 <input id="telefono" placeholder="Número de Teléfono" type="tel">
                 <button onclick="mostrarPreguntas()">Iniciar Encuesta</button>
             `;
+            activarSonido(); // Activar el sonido al aceptar participar
         }
 
         function mostrarPreguntas() {
@@ -149,9 +159,9 @@
 
         function activarSonido() {
             const video = document.getElementById('video-fondo');
-            video.muted = false;
-            video.play();
-            document.getElementById('video-overlay').style.display = 'none';
+            video.muted = false; // Activar el sonido
+            video.play(); // Asegurarse de que se reproduzca
+            document.getElementById('video-overlay').style.display = 'none'; // Ocultar el botón de sonido
         }
     </script>
 </body>
